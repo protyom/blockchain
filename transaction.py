@@ -43,7 +43,6 @@ class Tx:
         for public_key, amount in self.inputs:
             if amount < 0:
                 return False
-            total_in += amount
             if not self.check_address(public_key, message):
                 return False
 
@@ -51,15 +50,19 @@ class Tx:
             if not self.check_address(public_key, message):
                 return False
 
-        for public_key, amount in self.outputs:
-            if amount < 0:
-                return False
-            total_out += amount
-
-        if total_in < total_out:
-            return False
-
         return True
+
+    def get_total_in(self):
+        total_in = 0
+        for address, amount in self.inputs:
+            total_in += amount
+        return total_in
+
+    def get_total_out(self):
+        total_out = 0
+        for address, amount in self.outputs:
+            total_out += amount
+        return total_out
 
     def __repr__(self):
         header = 'Transaction class:\nInputs:\n'

@@ -6,7 +6,6 @@ from Crypto.Hash import SHA256
 def generate_keys():
     keyPair = RSA.generate(bits=1024)
     public_key = keyPair.publickey().export_key()
-    print(public_key)
     return keyPair, public_key
 
 
