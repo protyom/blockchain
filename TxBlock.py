@@ -11,7 +11,7 @@ from Crypto.Hash import SHA256
 
 
 REWARD = 25.
-LEADING_ZEROS = 4
+LEADING_ZEROS = 2
 TARGET_START = bytes(''.join(['\x4f' for i in range(LEADING_ZEROS)]), 'utf8')
 
 
@@ -26,6 +26,12 @@ class TxBlock(CBlock):
     def is_valid(self):
         if not super(TxBlock, self).is_valid():
             return False
+        total_in, total_out = self.get_totals()
+        if total_out - total_in - REWARD > 0.0000001:
+            return False
+        return True
+
+    def get_totals(self):
         total_in = 0
         total_out = 0
         for transaction in self.data:
@@ -33,11 +39,11 @@ class TxBlock(CBlock):
                 return False
             total_in += transaction.get_total_in()
             total_out += transaction.get_total_out()
-        if total_out - total_in - REWARD > 0.0000001:
-            return False
-        return True
+        return total_in, total_out
 
     def compute_hash(self):
+        if self.previous_block is None:
+            return None
         hash = SHA256.new()
         hash.update(bytes(str(self.data), 'utf8'))
         hash.update(bytes(str(self.previous_hash), 'utf8'))
@@ -45,7 +51,11 @@ class TxBlock(CBlock):
         return hash.digest()
 
     def is_good_nonce(self):
-        digest = self.compute_hash()
+        hash = SHA256.new()
+        hash.update(bytes(str(self.data), 'utf8'))
+        hash.update(bytes(str(self.previous_hash), 'utf8'))
+        hash.update(self.nonce)
+        digest = hash.digest()
         return digest[:LEADING_ZEROS] == TARGET_START
 
     def find_nonce(self):

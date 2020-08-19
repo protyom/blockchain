@@ -43,11 +43,11 @@ connection.close()
 
 if new_block.is_valid():
     print("Success! Block is valid")
-if new_block.good_nonce():
+if new_block.is_good_nonce():
     print("Success! Nonce is valid")
 
 for b in head_blocks:
-    if new_block.previousHash == b.compute_hash():
+    if b is None or new_block.previous_hash == b.compute_hash():
         new_block.previous_block = b
         head_blocks.remove(b)
         head_blocks.append(new_block)
