@@ -37,12 +37,15 @@ class TxBlock(CBlock):
             return False
         return True
 
-    def is_good_nonce(self):
+    def compute_hash(self):
         hash = SHA256.new()
         hash.update(bytes(str(self.data), 'utf8'))
         hash.update(bytes(str(self.previous_hash), 'utf8'))
         hash.update(self.nonce)
-        digest = hash.digest()
+        return hash.digest()
+
+    def is_good_nonce(self):
+        digest = self.compute_hash()
         return digest[:LEADING_ZEROS] == TARGET_START
 
     def find_nonce(self):
